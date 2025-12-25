@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface HistoryItem {
   id: string;
@@ -12,15 +13,8 @@ interface HistoryItem {
   created_at: string;
 }
 
-const INFOGRAPHIC_PROMPTS = [
-  "إنفوجرافيك عن الدورة الدموية",
-  "إنفوجرافيك عن النظام الشمسي",
-  "إنفوجرافيك عن دورة المياه في الطبيعة",
-  "إنفوجرافيك عن أركان الإسلام",
-  "إنفوجرافيك عن مراحل نمو النبات",
-];
-
 const ImageGenerator = () => {
+  const { t, isRTL } = useLanguage();
   const [prompt, setPrompt] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,17 +59,17 @@ const ImageGenerator = () => {
 
     if (error) {
       console.error("Error deleting from history:", error);
-      toast.error("فشل في حذف الصورة");
+      toast.error(t.errorDelete);
       return;
     }
 
-    toast.success("تم حذف الصورة");
+    toast.success(t.successDelete);
     fetchHistory();
   };
 
   const generateImage = async () => {
     if (!prompt.trim()) {
-      toast.error("الرجاء إدخال وصف للصورة");
+      toast.error(t.errorEnterPrompt);
       return;
     }
 
@@ -85,8 +79,8 @@ const ImageGenerator = () => {
     try {
       // Enhance prompt for infographic if it contains infographic keywords
       let enhancedPrompt = prompt.trim();
-      if (prompt.includes("إنفوجرافيك") || prompt.includes("infographic")) {
-        enhancedPrompt = `Educational infographic design, clean modern layout, Arabic text labels, colorful icons and illustrations, professional study material style: ${prompt.trim()}`;
+      if (prompt.toLowerCase().includes("infographic") || prompt.includes("إنفوجرافيك")) {
+        enhancedPrompt = `Educational infographic design, clean modern layout, colorful icons and illustrations, professional study material style: ${prompt.trim()}`;
       }
 
       const { data, error } = await supabase.functions.invoke("generate-image", {
@@ -95,20 +89,20 @@ const ImageGenerator = () => {
 
       if (error) {
         console.error("Error generating image:", error);
-        toast.error(error.message || "فشل في إنشاء الصورة");
+        toast.error(error.message || t.errorGenerate);
         return;
       }
 
       if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
         await saveToHistory(prompt.trim(), data.imageUrl);
-        toast.success("تم إنشاء الصورة بنجاح!");
+        toast.success(t.successGenerate);
       } else if (data?.error) {
         toast.error(data.error);
       }
     } catch (err) {
       console.error("Unexpected error:", err);
-      toast.error("حدث خطأ غير متوقع. حاول مرة أخرى.");
+      toast.error(t.errorUnexpected);
     } finally {
       setIsLoading(false);
     }
@@ -134,9 +128,9 @@ const ImageGenerator = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success("تم تحميل الصورة!");
+      toast.success(t.successDownload);
     } catch {
-      toast.error("فشل في تحميل الصورة");
+      toast.error(t.errorDownload);
     }
   };
 
@@ -152,9 +146,9 @@ const ImageGenerator = () => {
       <div className="flex flex-wrap justify-center gap-2">
         <span className="text-sm text-muted-foreground flex items-center gap-1">
           <BookOpen className="h-4 w-4" />
-          أفكار سريعة:
+          {t.quickIdeas}
         </span>
-        {INFOGRAPHIC_PROMPTS.map((p, i) => (
+        {t.infographicPrompts.map((p, i) => (
           <button
             key={i}
             onClick={() => setPrompt(p)}
@@ -170,31 +164,49 @@ const ImageGenerator = () => {
         <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-xl blur-lg opacity-30 animate-pulse-glow" />
         <div className="relative glass rounded-xl p-2">
           <div className="flex gap-2">
-            <Button
-              onClick={generateImage}
-              disabled={isLoading || !prompt.trim()}
-              className="h-14 px-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity text-primary-foreground font-semibold"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5 ml-2" />
-                  إنشاء
-                </>
-              )}
-            </Button>
+            {isRTL && (
+              <Button
+                onClick={generateImage}
+                disabled={isLoading || !prompt.trim()}
+                className="h-14 px-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity text-primary-foreground font-semibold"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5 ml-2" />
+                    {t.generateBtn}
+                  </>
+                )}
+              </Button>
+            )}
             <div className="relative flex-1">
-              <Wand2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Wand2 className={`absolute ${isRTL ? "right-4" : "left-4"} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
               <Input
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="صف الصورة أو الإنفوجرافيك الذي تريد إنشاءه..."
-                className="pr-12 h-14 bg-background/50 border-border/50 text-lg placeholder:text-muted-foreground/60 focus-visible:ring-primary/50 text-right"
+                placeholder={t.inputPlaceholder}
+                className={`${isRTL ? "pr-12" : "pl-12"} h-14 bg-background/50 border-border/50 text-lg placeholder:text-muted-foreground/60 focus-visible:ring-primary/50`}
                 disabled={isLoading}
               />
             </div>
+            {!isRTL && (
+              <Button
+                onClick={generateImage}
+                disabled={isLoading || !prompt.trim()}
+                className="h-14 px-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity text-primary-foreground font-semibold"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    {t.generateBtn}
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -207,7 +219,7 @@ const ImageGenerator = () => {
           className="gap-2 text-muted-foreground hover:text-foreground"
         >
           <History className="h-4 w-4" />
-          {showHistory ? "إخفاء السجل" : "عرض السجل"}
+          {showHistory ? t.hideHistory : t.showHistory}
           {history.length > 0 && (
             <span className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs">
               {history.length}
@@ -219,7 +231,7 @@ const ImageGenerator = () => {
       {/* History Section */}
       {showHistory && history.length > 0 && (
         <div className="glass rounded-xl p-4 animate-fade-in">
-          <h3 className="text-lg font-semibold mb-4 text-foreground">السجل</h3>
+          <h3 className="text-lg font-semibold mb-4 text-foreground">{t.history}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {history.map((item) => (
               <div
@@ -244,8 +256,8 @@ const ImageGenerator = () => {
                       }}
                       className="w-full h-7 text-xs"
                     >
-                      <Trash2 className="h-3 w-3 ml-1" />
-                      حذف
+                      <Trash2 className={`h-3 w-3 ${isRTL ? "ml-1" : "mr-1"}`} />
+                      {t.delete}
                     </Button>
                   </div>
                 </div>
@@ -263,7 +275,7 @@ const ImageGenerator = () => {
               <div className="w-20 h-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
               <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-primary animate-pulse" />
             </div>
-            <p className="text-muted-foreground animate-pulse">جاري إنشاء تحفتك الفنية...</p>
+            <p className="text-muted-foreground animate-pulse">{t.creating}</p>
           </div>
         )}
 
@@ -273,8 +285,8 @@ const ImageGenerator = () => {
               <Sparkles className="h-12 w-12 text-muted-foreground" />
             </div>
             <div className="text-center space-y-2">
-              <p className="text-lg font-medium text-foreground/80">إبداعك في انتظارك</p>
-              <p className="text-sm text-muted-foreground">أدخل وصفاً واضغط على إنشاء</p>
+              <p className="text-lg font-medium text-foreground/80">{t.waitingTitle}</p>
+              <p className="text-sm text-muted-foreground">{t.waitingSubtitle}</p>
             </div>
           </div>
         )}
@@ -285,7 +297,7 @@ const ImageGenerator = () => {
               <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-xl opacity-50" />
               <img
                 src={imageUrl}
-                alt="الصورة المُنشأة"
+                alt="Generated image"
                 className="relative w-full rounded-2xl shadow-2xl"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
@@ -298,7 +310,7 @@ const ImageGenerator = () => {
                 className="gap-2 border-border/50 hover:bg-secondary hover:border-primary/50 transition-all"
               >
                 <Download className="h-4 w-4" />
-                تحميل الصورة
+                {t.downloadImage}
               </Button>
             </div>
           </div>

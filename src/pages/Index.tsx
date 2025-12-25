@@ -1,9 +1,13 @@
 import { Sparkles, BookOpen } from "lucide-react";
 import ImageGenerator from "@/components/ImageGenerator";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const Index = () => {
+  const { t, isRTL } = useLanguage();
+
   return (
-    <div dir="rtl" className="min-h-screen bg-background relative overflow-hidden font-sans">
+    <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen bg-background relative overflow-hidden font-sans">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
@@ -21,25 +25,30 @@ const Index = () => {
         }}
       />
 
+      {/* Language Toggle - Top Right */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageToggle />
+      </div>
+
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
         {/* Header */}
         <header className="text-center mb-16 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-muted-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span>مولد الصور بالذكاء الاصطناعي</span>
+            <span>{t.tagline}</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-            <span className="text-gradient">عباس</span>
+            <span className="text-gradient">{t.appName}</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            حوّل أفكارك إلى صور مذهلة وإنفوجرافيك تعليمي. اكتب ما تتخيله وشاهد الذكاء الاصطناعي يجلبه للحياة.
+            {t.subtitle}
           </p>
 
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 text-sm text-accent-foreground">
             <BookOpen className="h-4 w-4" />
-            <span>متخصص في الإنفوجرافيك التعليمي</span>
+            <span>{t.infographicBadge}</span>
           </div>
         </header>
 
@@ -49,7 +58,7 @@ const Index = () => {
         {/* Footer hint */}
         <footer className="mt-16 text-center">
           <p className="text-sm text-muted-foreground/60">
-            اضغط Enter أو انقر على "إنشاء" لتوليد صورتك
+            {t.footerHint}
           </p>
         </footer>
       </div>
