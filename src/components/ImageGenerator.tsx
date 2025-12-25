@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Download, Loader2, Wand2, History, Trash2, BookOpen } from "lucide-react";
+import { Sparkles, Download, Loader2, Wand2, Trash2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
+import AppMenu from "@/components/AppMenu";
 
 interface HistoryItem {
   id: string;
@@ -77,7 +78,6 @@ const ImageGenerator = () => {
     setImageUrl(null);
 
     try {
-      // Enhance prompt for infographic if it contains infographic keywords
       let enhancedPrompt = prompt.trim();
       if (prompt.toLowerCase().includes("infographic") || prompt.includes("إنفوجرافيك")) {
         enhancedPrompt = `Educational infographic design, clean modern layout, colorful icons and illustrations, professional study material style: ${prompt.trim()}`;
@@ -142,6 +142,15 @@ const ImageGenerator = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8">
+      {/* Menu - Top Right */}
+      <div className={`absolute top-4 ${isRTL ? "left-4" : "right-4"} z-20`}>
+        <AppMenu
+          historyCount={history.length}
+          showHistory={showHistory}
+          onToggleHistory={() => setShowHistory(!showHistory)}
+        />
+      </div>
+
       {/* Quick Prompts for Infographics */}
       <div className="flex flex-wrap justify-center gap-2">
         <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -209,23 +218,6 @@ const ImageGenerator = () => {
             )}
           </div>
         </div>
-      </div>
-
-      {/* History Toggle */}
-      <div className="flex justify-center">
-        <Button
-          variant="ghost"
-          onClick={() => setShowHistory(!showHistory)}
-          className="gap-2 text-muted-foreground hover:text-foreground"
-        >
-          <History className="h-4 w-4" />
-          {showHistory ? t.hideHistory : t.showHistory}
-          {history.length > 0 && (
-            <span className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs">
-              {history.length}
-            </span>
-          )}
-        </Button>
       </div>
 
       {/* History Section */}

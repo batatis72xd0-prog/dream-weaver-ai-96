@@ -1,6 +1,5 @@
 import { Sparkles, BookOpen } from "lucide-react";
 import ImageGenerator from "@/components/ImageGenerator";
-import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const Index = () => {
@@ -24,11 +23,6 @@ const Index = () => {
           backgroundSize: "60px 60px",
         }}
       />
-
-      {/* Language Toggle - Top Right */}
-      <div className="absolute top-4 right-4 z-20">
-        <LanguageToggle />
-      </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
         {/* Header */}
