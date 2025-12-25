@@ -1,13 +1,13 @@
-import { Sparkles } from "lucide-react";
+import { Sparkles, BookOpen } from "lucide-react";
 import ImageGenerator from "@/components/ImageGenerator";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div dir="rtl" className="min-h-screen bg-background relative overflow-hidden font-sans">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "-3s" }} />
+        <div className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 -left-32 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "-3s" }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl" />
       </div>
 
@@ -26,18 +26,21 @@ const Index = () => {
         <header className="text-center mb-16 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-muted-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span>AI-Powered Image Generation</span>
+            <span>مولد الصور بالذكاء الاصطناعي</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-            <span className="text-gradient">Imagine</span>
-            <span className="text-foreground"> & Create</span>
+            <span className="text-gradient">عباس</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Transform your ideas into stunning visuals. Simply describe what you envision, 
-            and watch AI bring it to life.
+            حوّل أفكارك إلى صور مذهلة وإنفوجرافيك تعليمي. اكتب ما تتخيله وشاهد الذكاء الاصطناعي يجلبه للحياة.
           </p>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 text-sm text-accent-foreground">
+            <BookOpen className="h-4 w-4" />
+            <span>متخصص في الإنفوجرافيك التعليمي</span>
+          </div>
         </header>
 
         {/* Generator */}
@@ -46,7 +49,7 @@ const Index = () => {
         {/* Footer hint */}
         <footer className="mt-16 text-center">
           <p className="text-sm text-muted-foreground/60">
-            Press Enter or click Generate to create your image
+            اضغط Enter أو انقر على "إنشاء" لتوليد صورتك
           </p>
         </footer>
       </div>
