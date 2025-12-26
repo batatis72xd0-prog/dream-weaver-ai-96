@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, sourceImage } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       console.error("Missing or invalid prompt");
@@ -23,6 +23,7 @@ serve(async (req) => {
     }
 
     console.log("Generating image with prompt:", prompt);
+    console.log("Source image provided:", !!sourceImage);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -31,6 +32,28 @@ serve(async (req) => {
         JSON.stringify({ error: "API key not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Build the message content
+    let messageContent: any;
+    
+    if (sourceImage) {
+      // Image-to-image: include both text and image
+      messageContent = [
+        {
+          type: "text",
+          text: prompt,
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: sourceImage,
+          },
+        },
+      ];
+    } else {
+      // Text-to-image: just the prompt
+      messageContent = prompt;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -44,7 +67,7 @@ serve(async (req) => {
         messages: [
           {
             role: "user",
-            content: prompt,
+            content: messageContent,
           },
         ],
         modalities: ["image", "text"],

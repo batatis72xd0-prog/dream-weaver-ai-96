@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Download, Loader2, Wand2, Trash2, BookOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Sparkles, Download, Loader2, Wand2, Image as ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuth } from "@/hooks/useAuth";
 import AppMenu from "@/components/AppMenu";
 
 interface HistoryItem {
@@ -16,15 +18,25 @@ interface HistoryItem {
 
 const ImageGenerator = () => {
   const { t, isRTL } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchHistory();
-  }, []);
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchHistory();
+    }
+  }, [user]);
 
   const fetchHistory = async () => {
     const { data, error } = await supabase
@@ -42,9 +54,12 @@ const ImageGenerator = () => {
   };
 
   const saveToHistory = async (prompt: string, imageUrl: string) => {
+    if (!user) return;
+    
     const { error } = await supabase.from("image_history").insert({
       prompt,
       image_url: imageUrl,
+      user_id: user.id,
     });
 
     if (error) {
@@ -55,17 +70,24 @@ const ImageGenerator = () => {
     fetchHistory();
   };
 
-  const deleteFromHistory = async (id: string) => {
-    const { error } = await supabase.from("image_history").delete().eq("id", id);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (error) {
-      console.error("Error deleting from history:", error);
-      toast.error(t.errorDelete);
+    if (!file.type.startsWith("image/")) {
+      toast.error(isRTL ? "يرجى رفع صورة فقط" : "Please upload an image file");
       return;
     }
 
-    toast.success(t.successDelete);
-    fetchHistory();
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setUploadedImage(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeUploadedImage = () => {
+    setUploadedImage(null);
   };
 
   const generateImage = async () => {
@@ -84,7 +106,10 @@ const ImageGenerator = () => {
       }
 
       const { data, error } = await supabase.functions.invoke("generate-image", {
-        body: { prompt: enhancedPrompt },
+        body: { 
+          prompt: enhancedPrompt,
+          sourceImage: uploadedImage
+        },
       });
 
       if (error) {
@@ -97,6 +122,7 @@ const ImageGenerator = () => {
         setImageUrl(data.imageUrl);
         await saveToHistory(prompt.trim(), data.imageUrl);
         toast.success(t.successGenerate);
+        setUploadedImage(null);
       } else if (data?.error) {
         toast.error(data.error);
       }
@@ -134,38 +160,51 @@ const ImageGenerator = () => {
     }
   };
 
-  const selectHistoryItem = (item: HistoryItem) => {
-    setImageUrl(item.image_url);
-    setPrompt(item.prompt);
-    setShowHistory(false);
-  };
+  if (authLoading) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8">
       {/* Menu - Top Right */}
       <div className={`absolute top-4 ${isRTL ? "left-4" : "right-4"} z-20`}>
-        <AppMenu
-          historyCount={history.length}
-          showHistory={showHistory}
-          onToggleHistory={() => setShowHistory(!showHistory)}
-        />
+        <AppMenu historyCount={history.length} />
       </div>
 
-      {/* Quick Prompts for Infographics */}
-      <div className="flex flex-wrap justify-center gap-2">
-        <span className="text-sm text-muted-foreground flex items-center gap-1">
-          <BookOpen className="h-4 w-4" />
-          {t.quickIdeas}
-        </span>
-        {t.infographicPrompts.map((p, i) => (
-          <button
-            key={i}
-            onClick={() => setPrompt(p)}
-            className="text-xs px-3 py-1.5 rounded-full glass hover:bg-primary/20 transition-colors text-muted-foreground hover:text-foreground"
-          >
-            {p}
-          </button>
-        ))}
+      {/* Image Upload Section */}
+      <div className="flex justify-center">
+        {uploadedImage ? (
+          <div className="relative glass rounded-xl p-2 inline-block">
+            <img
+              src={uploadedImage}
+              alt="Uploaded"
+              className="h-24 w-24 object-cover rounded-lg"
+            />
+            <button
+              onClick={removeUploadedImage}
+              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/80"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <div className="glass rounded-xl px-4 py-2 flex items-center gap-2 hover:bg-primary/10 transition-colors text-muted-foreground hover:text-foreground">
+              <ImageIcon className="h-5 w-5" />
+              <span className="text-sm">{isRTL ? "رفع صورة (اختياري)" : "Upload image (optional)"}</span>
+            </div>
+          </label>
+        )}
       </div>
 
       {/* Input Section */}
@@ -219,45 +258,6 @@ const ImageGenerator = () => {
           </div>
         </div>
       </div>
-
-      {/* History Section */}
-      {showHistory && history.length > 0 && (
-        <div className="glass rounded-xl p-4 animate-fade-in">
-          <h3 className="text-lg font-semibold mb-4 text-foreground">{t.history}</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {history.map((item) => (
-              <div
-                key={item.id}
-                className="relative group cursor-pointer rounded-lg overflow-hidden"
-              >
-                <img
-                  src={item.image_url}
-                  alt={item.prompt}
-                  className="w-full aspect-square object-cover transition-transform group-hover:scale-105"
-                  onClick={() => selectHistoryItem(item)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <p className="text-xs text-foreground line-clamp-2 mb-2">{item.prompt}</p>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteFromHistory(item.id);
-                      }}
-                      className="w-full h-7 text-xs"
-                    >
-                      <Trash2 className={`h-3 w-3 ${isRTL ? "ml-1" : "mr-1"}`} />
-                      {t.delete}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Result Section */}
       <div className="relative min-h-[400px]">
