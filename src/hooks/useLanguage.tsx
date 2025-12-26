@@ -6,12 +6,8 @@ interface Translations {
   appName: string;
   tagline: string;
   subtitle: string;
-  infographicBadge: string;
-  quickIdeas: string;
   generateBtn: string;
   inputPlaceholder: string;
-  showHistory: string;
-  hideHistory: string;
   history: string;
   delete: string;
   creating: string;
@@ -27,20 +23,15 @@ interface Translations {
   errorDownload: string;
   successDelete: string;
   errorDelete: string;
-  infographicPrompts: string[];
 }
 
 const translations: Record<Language, Translations> = {
   en: {
     appName: "Abbas",
-    tagline: "AI-Powered Image Generation",
-    subtitle: "Transform your ideas into stunning visuals and educational infographics. Describe what you envision and watch AI bring it to life.",
-    infographicBadge: "Specialized in Educational Infographics",
-    quickIdeas: "Quick ideas:",
+    tagline: "AI-Abbas Image Generation",
+    subtitle: "Transform your ideas into images using Abbas AI. Describe what you want, and watch it come to life. Specialized in educational infographics.",
     generateBtn: "Generate",
     inputPlaceholder: "Describe the image or infographic you want to create...",
-    showHistory: "Show History",
-    hideHistory: "Hide History",
     history: "History",
     delete: "Delete",
     creating: "Creating your masterpiece...",
@@ -56,24 +47,13 @@ const translations: Record<Language, Translations> = {
     errorDownload: "Failed to download image",
     successDelete: "Image deleted",
     errorDelete: "Failed to delete image",
-    infographicPrompts: [
-      "Infographic about the circulatory system",
-      "Infographic about the solar system",
-      "Infographic about the water cycle",
-      "Infographic about photosynthesis",
-      "Infographic about plant growth stages",
-    ],
   },
   ar: {
     appName: "عبّاس",
-    tagline: "توليد الصور بالذكاء الاصطناعي",
-    subtitle: "حوّل أفكارك إلى صور مذهلة وإنفوجرافيك تعليمي. اكتب ما تتخيله وشاهد الذكاء الاصطناعي يحوله إلى واقع.",
-    infographicBadge: "متخصص في الإنفوجرافيك التعليمي",
-    quickIdeas: "أفكار سريعة:",
+    tagline: "توليد الصور بذكاء عبّاس",
+    subtitle: "حوّل أفكارك إلى صور باستخدام ذكاء عبّاس. اكتب ما تريد وشاهده يتحول إلى واقع. متخصص في الإنفوجرافيك التعليمي.",
     generateBtn: "إنشاء",
     inputPlaceholder: "اكتب وصفاً للصورة أو الإنفوجرافيك الذي تريد إنشاءه...",
-    showHistory: "عرض السجل",
-    hideHistory: "إخفاء السجل",
     history: "السجل",
     delete: "حذف",
     creating: "جارٍ إنشاء تحفتك الفنية...",
@@ -89,13 +69,6 @@ const translations: Record<Language, Translations> = {
     errorDownload: "فشل في تحميل الصورة",
     successDelete: "تم حذف الصورة",
     errorDelete: "فشل في حذف الصورة",
-    infographicPrompts: [
-      "إنفوجرافيك عن الجهاز الدوري",
-      "إنفوجرافيك عن المجموعة الشمسية",
-      "إنفوجرافيك عن دورة الماء في الطبيعة",
-      "إنفوجرافيك عن عملية البناء الضوئي",
-      "إنفوجرافيك عن مراحل نمو النبات",
-    ],
   },
 };
 

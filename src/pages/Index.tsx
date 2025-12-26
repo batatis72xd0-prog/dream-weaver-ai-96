@@ -1,4 +1,4 @@
-import { Sparkles, BookOpen } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import ImageGenerator from "@/components/ImageGenerator";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -39,11 +39,6 @@ const Index = () => {
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             {t.subtitle}
           </p>
-
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 text-sm text-accent-foreground">
-            <BookOpen className="h-4 w-4" />
-            <span>{t.infographicBadge}</span>
-          </div>
         </header>
 
         {/* Generator */}
